@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap">
+    <title>Chat APP</title>
+
+    <style>
+      body {
+        font-family: 'Source Code Pro', monospace;
+        background-color: #2b2b2b;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        color: #fff;
+      }
+
+      h1 {
+        color: #bbb;
+      }
+
+      #messageContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      #username,
+      #message {
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        width: 300px;
+        font-size: 16px;
+        background-color: #444;
+        color: #fff;
+        outline: none;
+      }
+
+      #sendBtn {
+        padding: 10px;
+        background-color: #008080;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      #sendBtn:hover {
+        background-color: #006666;
+      }
+
+      #messagesContainer {
+        margin-top: 20px;
+        max-width: 400px;
+        height: 350px;
+        overflow-y: auto;
+        background-color: #444;
+        border: 1px solid #555;
+        border-radius: 5px;
+      }
+
+      #messages p {
+        background-color: #008080;
+        color: white;
+        padding: 10px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Welcome to the ChatRoom</h1>
+
+      <div id="messageContainer">
+        <input type="text" id="username" placeholder="Enter Username" />
+        <input type="text" id="message" placeholder="Enter Message" />
+        <button id="sendBtn">Send</button>
+      </div>
+
+      <div id="messagesContainer">
+        <div id="messages"></div>
+      </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const sendBtn = document.getElementById("sendBtn");
+      const usernameInput = document.getElementById("username");
+      const messageInput = document.getElementById("message");
+      const allMessages = document.getElementById("messages");
+    
+      const userColors = {};
+    
+      function getRandomColor() {
+        const letters = "0123456789ABCDEF";
+        let color = "#";
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+    
+      function sendMessage() {
+        const username = usernameInput.value;
+        const message = messageInput.value;
+    
+        if (!userColors[username]) {
+          userColors[username] = getRandomColor();
+        }
+    
+        socket.emit("user-message", { username, message, color: userColors[username] });
+        messageInput.value = "";
+      }
+    
+      sendBtn.addEventListener("click", sendMessage);
+    
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      });
+    
+      socket.on("message", (data) => {
+        const { username, message, color } = data;
+        const p = document.createElement("p");
+        
+        p.style.backgroundColor = color;
+        p.style.color = "white";
+    
+        p.innerText = `${username}: ${message}`;
+        allMessages.appendChild(p);
+    
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      });
+    </script>
+    
+  </body>
+</html>
