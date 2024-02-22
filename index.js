@@ -19,5 +19,5 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/index.html"));
 });
 
-const PORT = process.env.PORT || 9000;
+const isProduction = process.env.NODE_ENV === 'production';
 server.listen(PORT, () => console.log(`Server Started at PORT: ${PORT}`));
